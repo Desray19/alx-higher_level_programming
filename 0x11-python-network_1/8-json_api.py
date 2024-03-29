@@ -14,4 +14,4 @@ if __name__ == "__main__":
         else:
             print("No result")
     except FileNotFoundError as f:
-        print("Not a valid JSON", f)
+        print("Not a valid JSON")
