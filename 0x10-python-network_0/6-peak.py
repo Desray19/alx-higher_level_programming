@@ -8,22 +8,22 @@ def find_peak(list_of_integers):
     Returns:
         The value of a peak in the list, or None if no peak is found.
     """
-
-    length = len(list_of_integers)
-
-    if length == 0:  # Handle empty list
+    if (not list_of_integers):
         return None
-
-    start = 0
-    end = length - 1
-
-    while start < end:
-        mid = (start + end) // 2
-
-        if list_of_integers[mid] > list_of_integers[mid + 1]:  # Look for a descending section
-            end = mid
-        else:  # Look for an ascending or flat section (potential peak)
-            start = mid + 1
-
-    return list_of_integers[start]  # The first element in the descending section is a peak
-
+    if (len(list_of_integers) <= 2):
+        return max(list_of_integers)
+    peak = None
+    if (list_of_integers[0] >= list_of_integers[1]):
+        peak = list_of_integers[0]
+    if (list_of_integers[-1] >= list_of_integers[-2]):
+        peak = list_of_integers[-1]
+    if (peak):
+        return peak
+    idx = 1
+    while (idx < len(list_of_integers) - 1):
+        if (list_of_integers[idx] >= list_of_integers[idx + 1] and
+                list_of_integers[idx] >= list_of_integers[idx - 1]):
+            return list_of_integers[idx]
+        else:
+            idx += 1
+    return peak
