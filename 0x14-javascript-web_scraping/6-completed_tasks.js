@@ -1,32 +1,33 @@
 #!/usr/bin/node
 
 const request = require('request');
+const url = process.argv[2];
 
-const apiUrl = process.argv[2];
+// Function to handle the request and process the response
+function fetchAndProcessTasks (url) {
+  request(url, function (err, response, body) {
+    if (err) {
+      console.log(err);
+      return;
+    }
 
-request(apiUrl, function (error, response, body) {
-  if (!error && response.statusCode === 200) {
-    try {
-      const todos = JSON.parse(body);
-      const completed = {};
+    if (response.statusCode === 200) {
+      const completedTasks = {};
+      const tasks = JSON.parse(body);
 
-      todos.forEach((todo) => {
-        if (todo.completed) {
-          if (completed[todo.userId] === undefined) {
-            completed[todo.userId] = 1;
-          } else {
-            completed[todo.userId]++;
-          }
+      tasks.forEach(task => {
+        if (task.completed) {
+          const userId = task.userId;
+          completedTasks[userId] = (completedTasks[userId] || 0) + 1;
         }
       });
 
-      const output = `{${Object.entries(completed).map(([key, value]) => ` '${key}': ${value}`).join(',\n ')} }`;
-
-      console.log(Object.keys(completed).length > 2 ? output : completed);
-    } catch (parseError) {
-      console.error('Error parsing JSON:', parseError);
+      console.log(completedTasks);
+    } else {
+      console.log('An error occurred. Status code: ' + response.statusCode);
     }
-  } else {
-    console.error('Error:', error);
-  }
-});
+  });
+}
+
+// Call the function with the provided URL
+fetchAndProcessTasks(url);
