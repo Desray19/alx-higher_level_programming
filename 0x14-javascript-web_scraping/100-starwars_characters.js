@@ -1,28 +1,29 @@
 #!/usr/bin/node
 
 const request = require('request');
+const util = require('util');
+const get = util.promisify(request.get);
 
-const movieId = process.argv[2];
-const apiUrl = `https://swapi.dev/api/films/${movieId}/`;
+const id = process.argv[2];
+const url = 'https://swapi-api.hbtn.io/api/films/';
 
-request(apiUrl, function (error, response, body) {
-  if (!error && response.statusCode === 200) {
-    const movieData = JSON.parse(body);
+async function fetchFilmAndCharacters (id) {
+  try {
+    const filmResponse = await get(url + id);
+    const filmData = JSON.parse(filmResponse.body);
+    const characterUrls = filmData.characters;
 
-    console.log(`Characters of "${movieData.title}":`);
-
-    movieData.characters.forEach((characterUrl) => {
-      request(characterUrl, function (charError, charResponse, charBody) {
-        if (!charError && charResponse.statusCode === 200) {
-          const characterData = JSON.parse(charBody);
-
-          console.log(characterData.name);
-        } else {
-          console.error('Error fetching character data:', charError);
-        }
-      });
+    const characterPromises = characterUrls.map(async (characterUrl) => {
+      const characterResponse = await get(characterUrl);
+      const characterData = JSON.parse(characterResponse.body);
+      return characterData.name;
     });
-  } else {
-    console.error('Error fetching movie data:', error);
+
+    const characterNames = await Promise.all(characterPromises);
+    console.log(characterNames.join('\n'));
+  } catch (error) {
+    console.error('Error fetching data:', error);
   }
-});
+}
+
+fetchFilmAndCharacters(id);
